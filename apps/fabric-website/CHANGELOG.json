@@ -2,6 +2,20 @@
   "name": "@uifabric/fabric-website",
   "entries": [
     {
+      "version": "5.8.9",
+      "tag": "@uifabric/fabric-website_v5.8.9",
+      "date": "Wed, 14 Apr 2021 00:15:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Elizabeth Craig <elcraig@microsoft.com>",
+            "commit": "5b16f258602b5973f0fb6d42e86d77c404ce046e",
+            "comment": "Fix issues loading the website"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.8.8",
       "tag": "@uifabric/fabric-website_v5.8.8",
       "date": "Wed, 10 Mar 2021 22:38:42 GMT",
