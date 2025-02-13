@@ -1,32 +1,58 @@
-// your app's webpack.config.js
-const path = require('path');
-const { TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin');
-const custom = require('@fluentui/scripts/storybook/webpack.config');
+// @ts-check
 
-module.exports = {
+const path = require('path');
+const { registerRules, registerTsPaths, rules } = require('@fluentui/scripts-storybook');
+
+const tsConfigPath = path.resolve(__dirname, '../../../tsconfig.base.v8.json');
+module.exports = /** @type {import('@storybook/react-webpack5').StorybookConfig} */ ({
   stories: ['../src/**/*.stories.tsx'],
-  babel: {},
+  core: {
+    disableTelemetry: true,
+  },
+  framework: {
+    name: '@storybook/react-webpack5',
+    options: {
+      builder: {
+        useSWC: true,
+        lazyCompilation: false,
+      },
+    },
+  },
   typescript: {
     // disable react-docgen-typescript (totally not needed here, slows things down a lot)
     reactDocgen: false,
   },
   webpackFinal: config => {
-    const tsPaths = new TsconfigPathsPlugin({
-      configFile: path.resolve(__dirname, '../../../tsconfig.base.json'),
-    });
+    registerTsPaths({ config, configFile: tsConfigPath });
+    registerRules({ config, rules: [rules.scssRule] });
 
-    if (config.resolve) {
-      config.resolve.plugins
-        ? config.resolve.plugins.push(tsPaths)
-        : (config.resolve.plugins = [tsPaths]);
-    }
-
-    config.module.rules.unshift({
-      test: /\.(ts|tsx)$/,
-      use: [{ loader: '@fluentui/make-styles-webpack-loader' }],
-    });
-
-    return custom(config);
+    return config;
   },
-  addons: ['@storybook/addon-actions'],
-};
+  swc() {
+    return {
+      jsc: {
+        target: 'es2019',
+        parser: {
+          syntax: 'typescript',
+          tsx: true,
+          decorators: true,
+          dynamicImport: true,
+        },
+        transform: {
+          decoratorMetadata: true,
+          legacyDecorator: true,
+        },
+        keepClassNames: true,
+        externalHelpers: true,
+        loose: true,
+        minify: {
+          mangle: false,
+        },
+      },
+    };
+  },
+  // 💡 NOTE: this is necessary for StoryWright. without this the current version "0.0.27-storybook7.9" wont take screenshots for Steps
+  features: {
+    storyStoreV7: false,
+  },
+});
